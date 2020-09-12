@@ -11,7 +11,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 
 public class AstraConnUtil {
-    private final static boolean debug = true;
+    private final static boolean debug = false;
 
     // Astra database keyspace, username and password
     final static String astraKeyspace = "testks";
@@ -29,23 +29,18 @@ public class AstraConnUtil {
             astraDbId + "-" + astraRegion + "." +
             "apps.astra.datastax.com";
 
+    // The number of API
+    final static int numRecordPerAPI = 500;
+
     // Get a CqlSession using the secure connection bundle
     public static CqlSession getCqlSession() {
-        CqlSession session = null;
-
-        session = CqlSession.builder()
+        CqlSession session = CqlSession.builder()
                 .withCloudSecureConnectBundle(Paths.get(secureConnBundleFile))
                 .withAuthCredentials(astraDBUserName,astraDBUserPwd)
                 .withKeyspace(astraKeyspace)
                 .build();
 
-        if (session != null) {
-            System.out.println("   --> Connection established.");
-        }
-        else {
-            System.out.println("   --> Connection failed.");
-        }
-
+        System.out.println("   --> Connection established.");
         return session;
     }
 
@@ -93,25 +88,27 @@ public class AstraConnUtil {
             }
 
             int responseCode = connection.getResponseCode();
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
-                System.out.println("       HTTP.response.code = " + responseCode);
+            if ( (connection.getResponseCode() != HttpURLConnection.HTTP_CREATED &&
+                    connection.getResponseCode() != HttpURLConnection.HTTP_OK) ) {
+                if (debug) {
+                    System.out.println("       HTTP.response.code = " + responseCode);
+                    BufferedReader br = new BufferedReader(
+                            new InputStreamReader((connection.getErrorStream())));
 
-                BufferedReader br = new BufferedReader(
-                        new InputStreamReader((connection.getErrorStream())));
-
-                StringBuilder errorStr = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    errorStr.append(responseLine.trim());
+                    StringBuilder errorStr = new StringBuilder();
+                    String responseLine;
+                    while ((responseLine = br.readLine()) != null) {
+                        errorStr.append(responseLine.trim());
+                    }
+                    System.out.println("       HTTP.response.error_message = " + errorStr.toString());
                 }
-                System.out.println("       HTTP.response.error_message = " + errorStr.toString());
             }
             else {
                 BufferedReader br = new BufferedReader(
                         new InputStreamReader((connection.getInputStream())));
 
                 StringBuilder responseStr = new StringBuilder();
-                String responseLine = null;
+                String responseLine;
                 while ((responseLine = br.readLine()) != null) {
                     responseStr.append(responseLine.trim());
                 }
@@ -136,6 +133,7 @@ public class AstraConnUtil {
     }
 
     // Get Access Token
+    @SuppressWarnings("unchecked")
     public static String getAccessToken() {
         String authTokenStr = null;
 
@@ -154,7 +152,7 @@ public class AstraConnUtil {
     }
 
     // Write a "document" (row) into a table
-    public static void WriteDocument(String accessToken, String tableName, JSONObject actor) {
+    public static boolean WriteDocument(String accessToken, String tableName, JSONObject actor) {
         int actor_id = (Integer)actor.get("actor_id");
 
         String authAPIStr =
@@ -164,5 +162,7 @@ public class AstraConnUtil {
         actor.remove("actor_id");
 
         JSONObject response = makeAPICall("PUT", accessToken, authAPIStr, actor);
+
+        return (response != null);
     }
 }
