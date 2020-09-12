@@ -14,6 +14,7 @@ public class LoadDvdData {
     // This is the C* keyspace name we're unloading data to
     final static String cKSName = "testks";
 
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         // Establish connection to PostgreSQL
         System.out.println(">> Connecting to PostgreSQL database(" + pDBName + ")...");
@@ -42,11 +43,13 @@ public class LoadDvdData {
         // ---
         // In DataStax Astra, we're keeping a similar schema with "last_update" column is dropped
 
+        int totalCnt = 0;
+        int failedCnt = 0;
+
         String tableName = "actor";
         String loadActorTblSQLString = "select * from "  +tableName;
 
-
-        System.out.println("\n>> Loading table \"" + tableName + "\" from PostgresSQL into Astra keyspace(" + pDBName + ")...");
+        System.out.println("\n>> Loading data from PostgresSQL and write into DataStax Astra using Stargate API...");
         try {
             Statement sqlStmt = pConn.createStatement();
 
@@ -54,6 +57,8 @@ public class LoadDvdData {
             ResultSetMetaData rsMeta = rs.getMetaData();
 
             while (rs.next()) {
+                totalCnt++;
+
                 // Convert each fetched row to a JSON object
                 JSONObject jsonObject = new JSONObject();
 
@@ -66,15 +71,16 @@ public class LoadDvdData {
                     }
                 }
 
-               AstraConnUtil.WriteDocument(authToken, tableName, jsonObject);
-
-                // For testing purpose, only process 1 record
-                break;
+                boolean success = AstraConnUtil.WriteDocument(authToken, tableName, jsonObject);
+                if (!success) failedCnt++;
             }
 
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();
         }
+
+        System.out.println("   Total records loaded: " + totalCnt );
+        System.out.println("         Failed records: " + failedCnt );
 
         // Close connections to both PostgreSQL and DataStax Astra
         if (pConn != null) {

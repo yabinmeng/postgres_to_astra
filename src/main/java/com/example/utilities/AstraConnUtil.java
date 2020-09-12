@@ -29,7 +29,8 @@ public class AstraConnUtil {
             astraDbId + "-" + astraRegion + "." +
             "apps.astra.datastax.com";
 
-    // The number of API
+    // The number of records to be included in one API call (batch write)
+    // NOTE: not supported yet.
     final static int numRecordPerAPI = 500;
 
     // Get a CqlSession using the secure connection bundle

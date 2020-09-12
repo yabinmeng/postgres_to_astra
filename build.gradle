@@ -9,6 +9,10 @@ repositories {
     mavenCentral()
 }
 
+compileJava {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
