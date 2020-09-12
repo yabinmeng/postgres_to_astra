@@ -15,15 +15,15 @@ public class AstraConnUtil {
 
     // Astra database keyspace, username and password
     final static String astraKeyspace = "testks";
-    final static String astraDBUserName = "demo";
-    final static String astraDBUserPwd = "demo123";
+    final static String astraDBUserName = "<user_name>";
+    final static String astraDBUserPwd = "<password>";
 
     // Astra connection settings for secure connection bundle
-    final static String secureConnBundleFile = "/Users/yabinmeng/Downloads/secure-connect-ymhtdemo2.zip";
+    final static String secureConnBundleFile = "<secure_connection_bundle_file>";
 
     // Astra Stargate API connection settings
-    final static String astraDbId = "2d9bdb01-216e-48a6-aa19-bc7963e21c47";
-    final static String astraRegion = "us-east1";
+    final static String astraDbId = "<astra_dtabase_id>";
+    final static String astraRegion = "<astra_region>";
 
     final static String astraStargateAPIBase = "https://" +
             astraDbId + "-" + astraRegion + "." +
