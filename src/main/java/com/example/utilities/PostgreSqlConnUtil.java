@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 public class PostgreSqlConnUtil {
     // PostgreSQL server connection settings
-    final static String postgreSQLSrv =  "10.101.33.137:5432";
-    final static String postgreSQLUsrName = "postgres";
+    final static String postgreSQLSrv =  "<postgres_server_ip>:<postgres_server_port>";
+    final static String postgreSQLUsrName = "<postgres_user_name>";
 
     // Connect to PostgreSQL server
     public static Connection getConnection(String database) {
